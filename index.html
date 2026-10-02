@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#174f78" />
+  <meta name="description" content="Rastreio: jogo de previsão de saída de código com aposta de confiança." />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Rastreio</title>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">JOGO EDUCATIVO</p>
+      <h1>Rastreio</h1>
+    </div>
+    <div class="top-actions">
+      <button id="resetBtn" class="btn ghost" type="button">Reiniciar sessão</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="panel intro" id="setupPanel">
+      <div>
+        <span class="badge">Funciona offline</span>
+        <h2>Preveja. Aposte. Debata. Revise. Execute.</h2>
+        <p>As cartas usam <strong>C++ com &lt;stdio.h&gt;</strong> e saída por <code>printf</code>. Algumas têm pequenas pegadinhas de lógica ou erros no código. Se o trecho não puder ser executado, responda exatamente <code>error</code>. Cada rodada tem <strong>no máximo 10 cartas</strong>, sorteadas conforme os filtros escolhidos.</p>
+      </div>
+
+      <div class="setup-grid">
+        <label>Nome do jogador
+          <input id="playerName" value="Jogador 1" maxlength="30" />
+        </label>
+
+        <label>Categoria
+          <select id="categorySelect">
+            <option value="all">Todas</option>
+            <option>Laços</option>
+            <option>Condicionais</option>
+            <option>Tipos e valores</option>
+            <option>Escopo e referência</option>
+            <option>Funções</option>
+          </select>
+        </label>
+
+        <label>Dificuldade
+          <select id="difficultySelect">
+            <option value="all">Todas</option>
+            <option value="1">Nível 1</option>
+            <option value="2">Nível 2</option>
+            <option value="3">Nível 3</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="startBtn" class="btn primary" type="button">Começar partida</button>
+    </section>
+
+    <section id="gamePanel" class="game-layout" hidden>
+      <aside class="panel sidebar">
+        <div class="metric"><span>Jogador</span><strong id="playerLabel">—</strong></div>
+        <div class="metric"><span>Pontos</span><strong id="scoreLabel">0</strong></div>
+        <div class="metric"><span>Cartas da rodada</span><strong id="roundLabel">0/10</strong></div>
+        <div class="metric"><span>Acertos</span><strong id="accuracyLabel">0%</strong></div>
+        <hr />
+        <h3>Calibração</h3>
+        <div id="calibration" class="calibration"></div>
+        <hr />
+        <button id="editorOpenBtn" class="btn secondary full" type="button">Criar carta</button>
+      </aside>
+
+      <section class="panel card-stage">
+        <div class="card-head">
+          <div>
+            <span id="categoryBadge" class="badge">Categoria</span>
+            <span id="difficultyBadge" class="badge subtle">Nível</span>
+            <span class="badge subtle">C++ + stdio.h</span>
+          </div>
+          <div id="timer" class="timer">01:00</div>
+        </div>
+
+        <div class="phase-track" aria-label="Etapas do jogo">
+          <span data-phase="reveal" class="active">1 Revelação</span>
+          <span data-phase="predict">2 Previsão</span>
+          <span data-phase="debate">3 Debate</span>
+          <span data-phase="review">4 Revisão</span>
+          <span data-phase="execute">5 Execução</span>
+          <span data-phase="score">6 Pontuação</span>
+        </div>
+
+        <div class="code-wrap">
+          <pre><code id="codeBox"></code></pre>
+        </div>
+
+        <div id="phaseContent" class="phase-content"></div>
+
+        <div class="stage-actions">
+          <button id="backBtn" class="btn ghost" type="button" hidden>Voltar</button>
+          <button id="nextBtn" class="btn primary" type="button">Ir para previsão</button>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel" id="sessionPanel" hidden>
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">HISTÓRICO</p>
+          <h2>Resultados da sessão</h2>
+        </div>
+        <button id="playAgainBtn" class="btn primary" type="button">Jogar novamente</button>
+      </div>
+      <div id="historyTableWrap"></div>
+    </section>
+  </main>
+
+  <dialog id="editorDialog">
+    <form method="dialog" class="editor-form" id="editorForm">
+      <div class="section-title">
+        <div><p class="eyebrow">EDITOR</p><h2>Criar carta</h2></div>
+        <button value="cancel" class="icon-btn" aria-label="Fechar">×</button>
+      </div>
+      <label>Categoria
+        <select id="editorCategory" required>
+          <option>Laços</option><option>Condicionais</option><option>Tipos e valores</option><option>Escopo e referência</option><option>Funções</option>
+        </select>
+      </label>
+      <label>Dificuldade
+        <select id="editorDifficulty" required><option value="1">Nível 1</option><option value="2">Nível 2</option><option value="3">Nível 3</option></select>
+      </label>
+      <label>Trecho de código C++ (stdio.h)
+        <textarea id="editorCode" rows="7" required placeholder="#include &lt;stdio.h&gt;&#10;&#10;int x = 1;&#10;printf(&quot;%d&quot;, x);"></textarea>
+      </label>
+      <label>Pseudocódigo equivalente
+        <textarea id="editorPseudo" rows="5" required></textarea>
+      </label>
+      <label>Saída esperada (use "error" se o código não executar)
+        <input id="editorOutput" required placeholder="Ex.: 6, A B C ou error" />
+      </label>
+      <label>Explicação
+        <textarea id="editorExplanation" rows="3" required></textarea>
+      </label>
+      <div class="stage-actions">
+        <button value="cancel" class="btn ghost">Cancelar</button>
+        <button id="saveCardBtn" value="default" class="btn primary">Salvar carta</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="cards.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
